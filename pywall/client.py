@@ -2,6 +2,7 @@
 from datetime import datetime
 from jenkinsapi.api import Jenkins
 from jenkinsapi.job import Job
+from jenkinsapi.build import Build
 from jenkinsapi.view import View
 
 
@@ -52,6 +53,8 @@ def get_jobs_status():
 		if(build):
 			project.update({'last_build': build.get_number()})
 			project.update({'status': build.get_status()})
+			if(build.is_running()):
+				project.update({'status': 'BUILDING'})
 			#who broke the build
 			if(build.get_actions()["causes"][0].has_key("userId")):
 				project.update({'user': build.get_actions()["causes"][0]["userId"]})

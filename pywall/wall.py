@@ -35,8 +35,8 @@ class Wall(Frame):
 			
 			#Rect dimension
 			default_offset = 2
-			size_w = (self.width - (sizeColumns * 10) ) / sizeColumns
-			size_h = (self.height - (sizeLines * 10) ) / sizeLines			
+			size_w = (self.width - (sizeColumns * default_offset) ) / sizeColumns
+			size_h = (self.height - (sizeLines * default_offset) ) / sizeLines			
 			
 			counter = 0 		
 			line = 0
@@ -57,7 +57,9 @@ class Wall(Frame):
 					color = 'red'
 				elif(job['status'] == 'ABORTED'):
 					color = 'dark sea green'
-				
+				elif(job['status'] == 'BUILDING'):
+					color = 'dark green'
+					
 				#Limits of 4 jobs per line 	
 				if(counter != 0 and counter % 4 == 0):
 					line += 1			
