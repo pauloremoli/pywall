@@ -17,7 +17,7 @@ def get_last_failure():
 	broken_jobs = []
 	for item in jenkins.get_jobs():
 		job = jenkins.get_job(item[0])
-		last_build = job.get_last_build()
+		last_build = job.get_last_build_or_none()
 		build = job.get_last_failed_build()
 		if((build is not None) and (last_build is not None) and (last_build.get_number() == build.get_number())):
 			broken_jobs.append(job)
