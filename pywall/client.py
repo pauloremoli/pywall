@@ -6,8 +6,8 @@ from jenkinsapi.view import View
 
 
 def get_jenkins():
-	jenkinsurl = "http://localhost:8080/jenkins"
-	# jenkinsurl = "http://192.168.4.38:8080/jenkins"
+	#jenkinsurl = "http://localhost:8080/jenkins"
+	jenkinsurl = "http://192.168.4.38:8080/jenkins"
 	return Jenkins(jenkinsurl)
 
 def get_last_failure():

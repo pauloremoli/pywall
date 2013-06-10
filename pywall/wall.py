@@ -15,12 +15,13 @@ class Wall(Frame):
 		self.parent = parent
 		self.pack(fill=BOTH, expand=1)
 		self.canvas = Canvas(self, bg="black",borderwidth=0,highlightthickness=0)		
-		self.canvas.pack(fill=BOTH, expand=1)    
+		self.canvas.pack(fill=BOTH, expand=1)		
 		self.update_view()
+		
 
 	def clear_wall(self):
 		#fill background
-		rect = 0, 0, self.parent.winfo_screenwidth(), self.parent.winfo_screenheight() 
+		rect = 0, 0, self.width, self.height 
 		self.canvas.create_rectangle(rect, outline='black', fill='black' ) 			
 		
 	def draw_jobs(self, jobs):
@@ -33,9 +34,9 @@ class Wall(Frame):
 			sizeLines = int((len(jobs) / 4) + 1)
 			
 			#Rect dimension
-			default_offset = 10
-			size_w = (self.parent.winfo_screenwidth() - (sizeColumns * 10) ) / sizeColumns
-			size_h = (self.parent.winfo_screenheight() - (sizeLines * 10) ) / sizeLines			
+			default_offset = 2
+			size_w = (self.width - (sizeColumns * 10) ) / sizeColumns
+			size_h = (self.height - (sizeLines * 10) ) / sizeLines			
 			
 			counter = 0 		
 			line = 0
@@ -78,7 +79,7 @@ class Wall(Frame):
 				posX = x + offsetX + (size_w / 2)
 				posY = y + offsetY+ (size_h / 2)
 				
-				self.canvas.create_text(posX, posY, text=job['project'], font= 'Arial 38 bold', fill='white')  
+				self.canvas.create_text(posX, posY, text=job['project'], font= 'Arial 20 bold', fill='white')  
 				
 				
 				temp += 1
@@ -86,9 +87,14 @@ class Wall(Frame):
 
 	def update_view(self):
 		jobs = get_jobs_status()
+		self.width = self.parent.winfo_width()
+		self.height = self.parent.winfo_height()
+		if(self.width == 1 and self.height == 1):
+			self.width = self.parent.winfo_screenwidth()
+			self.height = self.parent.winfo_screenheight()
 		if(jobs):
 			self.draw_jobs(jobs)
-		self.parent.after(60000, self.update_view)
+		self.parent.after(20000, self.update_view)
 
 	
 def main():
