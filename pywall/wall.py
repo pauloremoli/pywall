@@ -49,13 +49,13 @@ class Wall(Frame):
 				#Choose color for each build status
 				color = 'white'
 				if(job['last_build'] == None):
-					color = 'dark sea green'
+					color = 'grey50'
 				elif(job['status'] == 'SUCCESS'):
 					color = 'SpringGreen4'
 				elif(job['status'] == 'FAILURE'):
 					color = 'red'
 				elif(job['status'] == 'ABORTED'):
-					color = 'grey50'
+					color = 'dark sea green'
 				
 				#Limits of 4 jobs per line 	
 				if(counter != 0 and counter % 4 == 0):
