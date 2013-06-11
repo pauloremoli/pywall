@@ -101,6 +101,7 @@ class Wall(Frame):
 	
 def main():
 	root = Tk()
+	root.overrideredirect(1)
 	Wall(root)
 	w, h = root.winfo_screenwidth(), root.winfo_screenheight()
 	root.geometry("%dx%d+0+0" % (w, h))

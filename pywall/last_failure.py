@@ -39,17 +39,17 @@ class LastFailure(Frame):
 		message = ''
 		days = without_failure.days	
 		if(days > 0):
-			message += str(days) + 'DIAS '
+			message += str(days) + ' DIA(S) '
 		hours = without_failure.seconds / 3600
 		if(hours > 0):
 			if(message):
 				message += 'E '
-			message += str(hours) + ' HORAS '
+			message += str(hours) + ' HORA(S) '
 		minutes = without_failure.seconds / 60 % 60
 		if(minutes > 0):
 			if(message):
 				message += 'E '
-			message += str(minutes) + ' MINUTOS ' 
+			message += str(minutes) + ' MINUTO(S) ' 
 		message_p1 = 'ESTAMOS HÁ'
 		message_p2 = message
 		message_p3 = 'SEM FALHAS'
@@ -82,6 +82,7 @@ class LastFailure(Frame):
 		
 def main():
 	root = Tk()
+	root.overrideredirect(1)
 	LastFailure(root)
 	w, h = root.winfo_screenwidth(), root.winfo_screenheight()
 	root.geometry("%dx%d+0+0" % (w, h))
