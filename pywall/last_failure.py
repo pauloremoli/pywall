@@ -56,7 +56,7 @@ class LastFailure(Frame):
 		
 		posX = self.width / 2
 		posY = self.height / 2 - 100
-		text_font = 'Arial 50 bold'
+		text_font = 'Arial 40 bold'
 		self.canvas.create_text(posX, posY, text=message_p1, font= text_font, fill='white')
 		self.canvas.create_text(posX, posY + 100, text=message_p2, font=text_font, fill='white')
 		self.canvas.create_text(posX, posY + 200, text=message_p3, font=text_font, fill='white')  
