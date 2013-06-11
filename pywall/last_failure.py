@@ -43,7 +43,7 @@ class LastFailure(Frame):
 		hours = without_failure.seconds / 3600
 		if(hours > 0):
 			if(message):
-				message += 'E '
+				message += ', '
 			message += str(hours) + ' HORA(S) '
 		minutes = without_failure.seconds / 60 % 60
 		if(minutes > 0):
