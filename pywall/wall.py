@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 from Tkinter import Tk, Canvas, Frame, BOTH
-from jenkinsapi.api import Jenkins
-from jenkinsapi.build import Build
-from jenkinsapi.job import Job
-from client import get_jobs_status
-import math
-import threading
-
+from client import  get_view_status
+import sys
 
 
 class Wall(Frame):
-	def __init__(self, parent):
+
+	view = 0
+	views = []
+
+	def __init__(self, parent, views):
 		Frame.__init__(self, parent)   		 
 		self.parent = parent
 		self.pack(fill=BOTH, expand=1)
 		self.canvas = Canvas(self, bg="black",borderwidth=0,highlightthickness=0)		
 		self.canvas.pack(fill=BOTH, expand=1)		
+		self.views = views
 		self.update_view()
 		
 
@@ -82,13 +82,15 @@ class Wall(Frame):
 				posY = y + offsetY+ (size_h / 2)
 				
 				self.canvas.create_text(posX, posY, text=job['project'], font= 'Arial 20 bold', fill='white')  
-				
+  				
 				
 				temp += 1
 				counter += 1
 
 	def update_view(self):
-		jobs = get_jobs_status()
+
+		jobs = get_view_status(self.views[self.view % len(self.views)])
+		self.view = self.view + 1
 		self.width = self.parent.winfo_width()
 		self.height = self.parent.winfo_height()
 		if(self.width == 1 and self.height == 1):
@@ -96,16 +98,17 @@ class Wall(Frame):
 			self.height = self.parent.winfo_screenheight()
 		if(jobs):
 			self.draw_jobs(jobs)
-		self.parent.after(20000, self.update_view)
+		self.parent.after(5000, self.update_view)
 
-	
-def main():
-	root = Tk()
-	root.overrideredirect(1)
-	Wall(root)
-	w, h = root.winfo_screenwidth(), root.winfo_screenheight()
-	root.geometry("%dx%d+0+0" % (w, h))
-	root.mainloop()
 
 if __name__ == '__main__':
-	main()
+
+	if(len(sys.argv) > 1):
+		print sys.argv
+		args = sys.argv
+		del args[0]
+		root = Tk()
+		Wall(root, args)
+		w, h = root.winfo_screenwidth(), root.winfo_screenheight()
+		root.geometry("%dx%d+0+0" % (w, h))
+		root.mainloop()

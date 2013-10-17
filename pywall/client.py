@@ -4,11 +4,12 @@ from jenkinsapi.api import Jenkins
 from jenkinsapi.job import Job
 from jenkinsapi.build import Build
 from jenkinsapi.view import View
+from jenkinsapi.views import Views
 
 
 def get_jenkins():
-	jenkinsurl = "http://localhost:8080"
-# 	jenkinsurl = "http://192.168.4.38:8080/jenkins"
+#	jenkinsurl = "http://localhost:8080"
+ 	jenkinsurl = "http://192.168.4.38:8080/jenkins"
 	return Jenkins( jenkinsurl )
 
 def get_last_failure():
@@ -62,3 +63,29 @@ def get_jobs_status():
 		jobs.append( project )
 
 	return jobs
+
+
+def get_view_status(view_name):
+	jenkinsapi = get_jenkins()
+	views = Views(jenkinsapi)
+	view = views.__getitem__(view_name)
+	jobs = []
+	for item in view._get_jobs():
+		job = jenkinsapi.get_job(item[0])
+		project = {'project': item[0] }
+		build = job.get_last_build_or_none()
+		if( build ):
+			project.update( {'last_build': build.get_number()} )
+			project.update( {'status': build.get_status()} )
+			if( build.is_running() ):
+				project.update( {'status': 'BUILDING'} )
+			# who broke the build
+			if( build.get_actions()["causes"][0].has_key( "userId" ) ):
+				project.update( {'user': build.get_actions()["causes"][0]["userId"]} )
+		else:
+			project.update( {'last_build': None} )
+		jobs.append( project )
+
+	return jobs
+
+get_view_status("Build")
