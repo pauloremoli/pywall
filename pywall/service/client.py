@@ -7,8 +7,7 @@ from jenkinsapi.view import View
 from jenkinsapi.views import Views
 from jenkinsapi.jenkinsbase import JenkinsBase
 
-def get_jenkins():
- 	jenkinsurl = "http://192.168.3.99:8080/jenkins"
+def get_jenkins(jenkinsurl):
 	return Jenkins( jenkinsurl )
 
 def get_user_list_score():
