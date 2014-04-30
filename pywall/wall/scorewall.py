@@ -30,7 +30,6 @@ class ScoreWall(Wall):
 
 		yInit = ((height - textTotalHeight) / 2) - (textHeight / 2)
 
-
 		for user in self.users_score:
 			nameStr = str(index) + '.    ' + user["name"]
 

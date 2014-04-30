@@ -20,7 +20,7 @@ class FunnyCats():
 			connect(dbname)
 			self.is_connected = True
 		except ConnectionError:
-			print ("Connection error")
+			print("Connection error")
 			self.is_connected = False
 
 		for user in client.get_user_list_score(jenkins):
@@ -100,7 +100,8 @@ class FunnyCats():
 			if self.need_to_add_job(job_status["project"]):
 				scoreJob = ScoreJob(name=job_status["project"], last_build_number=last_build_number,
 				                    last_build_status=last_build_status)
-				print "Addded", scoreJob.to_json()
+				print
+				"Addded", scoreJob.to_json()
 				scoreJob.save()
 
 			if job_status is not None:

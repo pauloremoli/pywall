@@ -3,7 +3,6 @@
 from Tkinter import Tk
 
 import click
-
 from pywallframe import PyWallFrame
 
 

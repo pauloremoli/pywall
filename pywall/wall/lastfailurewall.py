@@ -1,7 +1,7 @@
 #!-*- coding: utf8 -*-
-import pytz
 from datetime import datetime
 
+import pytz
 from wall import Wall
 from service.client import get_last_failure
 
