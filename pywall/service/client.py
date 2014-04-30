@@ -8,15 +8,14 @@ def get_jenkins(jenkinsurl):
 	return Jenkins(jenkinsurl)
 
 
-def get_user_list_score():
-	jenkins = get_jenkins()
+def get_user_list_score(jenkins):
 	userList = []
 	urlJSON = jenkins.get_data(jenkins.base_server_url() + '/asynchPeople/api/python')
 	userListJSON = urlJSON['users']
 	for userJSON in userListJSON:
 		user = userJSON['user']
 		userURL = user['absoluteUrl']
-		userInfo = get_user_info_by_url(userURL)
+		userInfo = get_user_info_by_url(jenkins, userURL)
 		properties = userInfo['property']
 		userName = userInfo['fullName']
 		score = None
@@ -55,14 +54,12 @@ def userExists(userList, userName):
 	return False
 
 
-def get_user_info_by_url(url):
-	jenkins = get_jenkins()
+def get_user_info_by_url(jenkins, url):
 	urlJSON = jenkins.get_data(url + '/api/python')
 	return urlJSON
 
 
-def get_last_failure():
-	jenkins = get_jenkins()
+def get_last_failure(jenkins):
 	last_failed_build_date = None
 	culprits = []
 	broken_jobs = []
@@ -92,8 +89,7 @@ def get_last_failure():
 	return result
 
 
-def get_jobs_status():
-	jenkins = get_jenkins()
+def get_jobs_status(jenkins):
 	jobs = []
 	for item in jenkins.get_jobs():
 		job = jenkins.get_job(item[0])
@@ -114,12 +110,12 @@ def get_jobs_status():
 	return jobs
 
 
-def get_view_status(jenkinsapi, view_name):
-	views = Views(jenkinsapi)
+def get_view_status(jenkins, view_name):
+	views = Views(jenkins)
 	view = views.__getitem__(view_name)
 	jobs = []
 	for item in view._get_jobs():
-		job = jenkinsapi.get_job(item[0])
+		job = jenkins.get_job(item[0])
 		project = {'project': item[0]}
 		build = job.get_last_build_or_none()
 		if ( build ):

@@ -14,7 +14,7 @@ class LastFailureWall(Wall):
 		self.jenkins = jenkins
 
 	def update_info(self):
-		self.lastFailureInfo = get_last_failure()
+		self.lastFailureInfo = get_last_failure(self.jenkins)
 
 	def show(self):
 		self.update_info()

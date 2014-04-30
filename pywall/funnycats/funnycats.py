@@ -1,3 +1,5 @@
+import math
+
 __author__ = 'Paulo'
 
 from mongoengine import connect, ConnectionError
@@ -21,6 +23,11 @@ class FunnyCats():
 			print ("Connection error")
 			self.is_connected = False
 
+		for user in client.get_user_list_score(jenkins):
+			if User.objects(name=user["name"]).first() is None:
+				new_user = User(name=user["name"])
+				new_user.save()
+
 	def is_connected(self):
 		return self.is_connected
 
@@ -35,12 +42,7 @@ class FunnyCats():
 
 
 	def get_bonus_per_build(self, job):
-		bonus_count = 0
-		for downstream_job in job.get_downstream_jobs():
-			bonus_count += 1
-			bonus_count += self.get_bonus_per_build(downstream_job)
-
-		return bonus_count
+		return len(job.get_downstream_jobs())
 
 
 	def clear_score(self):
@@ -48,7 +50,6 @@ class FunnyCats():
 
 
 	def update_score_build(self, job, build):
-		updated = False
 		for culprit in build._data["culprits"]:
 			username = culprit["fullName"]
 			user = User.objects(name=username).first()
@@ -57,20 +58,23 @@ class FunnyCats():
 				user.save()
 
 			user_score = user.score
-			bonus = self.get_bonus_per_build(job)
+			total_bonus = math.ceil(self.get_bonus_per_build(job) / 2)
+			if total_bonus > 5:
+				total_bonus = 5
+			points = total_bonus + 1
 
-			if not build.is_running():
+			if build.is_running():
+				return False
+			else:
 				if build.get_status() == 'FAILURE':
-					user_score += bonus + 1 * -5
+					user_score += points * -5
 				elif build.get_status() == 'SUCCESS':
-					user_score += bonus + 1
+					user_score += points
 
 				user.update(set__score=user_score)
 				user.reload()
-				print "Score updated", user.to_json()
-				updated = True
 
-		return updated
+		return True
 
 
 	def update_user_score(self, job_status):
@@ -86,9 +90,6 @@ class FunnyCats():
 			build = job.get_build(build_number)
 			if self.update_score_build(job, build):
 				score_job.update(set__last_build_number=build_number)
-			else:
-				score_job.update(set__last_build_number=build_number)
-				print ("Nothing to update score from job %s" % job_status["project"] )
 
 
 	def update_view_score(self):
@@ -107,7 +108,7 @@ class FunnyCats():
 
 	def get_user_list_score(self):
 		users_score = []
-		for user in User.objects().order_by('score'):
+		for user in User.objects().order_by('-score'):
 			users_score.append({"name": user.name, "score": user.score})
 		return users_score
 
