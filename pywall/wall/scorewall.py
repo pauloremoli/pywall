@@ -1,19 +1,19 @@
-from funnycats.funnycats import FunnyCats
-
+from pywall.funnycats.funnycats import FunnyCats
+from pywall.funnycats.user import get_user_list_score
 from wall import Wall
 
 
 class ScoreWall(Wall):
 	userListScore = []
 
-	def __init__(self, canvas, jenkins, score_view, dbname):
-		Wall.__init__(self, canvas)
+	def __init__(self, canvas, jenkins_url, score_view, dbname):
+		Wall.__init__(self, canvas, jenkins_url)
 
-		self.funnycats = FunnyCats(jenkins, score_view, dbname)
+		self.funnycats = FunnyCats(self.jenkins, score_view, dbname)
 
 	def update_info(self):
 		self.funnycats.update_view_score()
-		self.users_score = self.funnycats.get_user_list_score()
+		self.users_score = get_user_list_score()
 
 	def show(self):
 		self.update_info()

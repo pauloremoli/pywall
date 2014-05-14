@@ -2,19 +2,20 @@
 from datetime import datetime
 
 import pytz
+
 from wall import Wall
-from service.client import get_last_failure
 
 
 class LastFailureWall(Wall):
 	lastFailureInfo = []
 
-	def __init__(self, canvas, jenkins):
-		Wall.__init__(self, canvas)
-		self.jenkins = jenkins
+	def __init__(self, canvas, jenkins_url):
+		Wall.__init__(self, canvas, jenkins_url)
+
 
 	def update_info(self):
-		self.lastFailureInfo = get_last_failure(self.jenkins)
+		assert self.jenkins is not None
+		self.lastFailureInfo = self.jenkins.get_last_failure()
 
 	def show(self):
 		self.update_info()

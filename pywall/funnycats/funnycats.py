@@ -1,55 +1,87 @@
 import math
 
-__author__ = 'Paulo'
-
 from mongoengine import connect, ConnectionError
+from mongoengine.connection import disconnect
 
-from score_job import ScoreJob
-from user import User
-from service import client
+from pywall.funnycats.config import Config
+from pywall.funnycats.score_job import ScoreJob, need_to_add_job, get_bonus_per_build
+from pywall.funnycats.user import User
+from pywall.service import jenkins_client
 
 
 class FunnyCats():
-	def __init__(self, jenkins, score_view, dbname):
+	def __init__(self, jenkins, score_view, db_name):
 		self.score_view = score_view
-		self.dbname = dbname
-		self.is_connected = False
+		self.db_name = db_name
+		self.connected = False
 		self.jenkins = jenkins
 
-		try:
-			connect(dbname)
-			self.is_connected = True
-		except ConnectionError:
-			print("Connection error")
-			self.is_connected = False
 
-		for user in client.get_user_list_score(jenkins):
-			if User.objects(name=user["name"]).first() is None:
+	def init(self):
+
+		if self.connect_db():
+			self.connected = True
+		else:
+			self.connected = False
+			return False
+
+		for user in self.jenkins.get_user_list(self.jenkins):
+			users = User.objects(name=user["name"])
+			if users.count() == 0:
 				new_user = User(name=user["name"])
 				new_user.save()
 
+		return True
+
 	def is_connected(self):
-		return self.is_connected
+		return self.connected
 
-	def need_to_add_job(self, job_name):
-		if job_name is None:
+
+	def update_user_score(self, job_status):
+
+		if self.connected is False:
 			return False
 
-		if ScoreJob.objects(name=job_name).count() == 0:
-			return True
-		else:
+		score_job = ScoreJob.objects(name=job_status["project"]).first()
+
+		score_last_build_number = score_job.last_build_number
+		if score_last_build_number == job_status["last_build"]:
+			return
+
+		job = self.jenkins.get_job(job_status["project"])
+		for build_number in range(score_last_build_number + 1, job_status["last_build"] + 1):
+
+			build = job.get_build(build_number)
+			if self.update_score_build(job, build):
+				score_job.update(set__last_build_number=build_number)
+
+
+	def update_view_score(self):
+		assert self.jenkins is not None
+
+		if self.connected is False:
 			return False
 
+		for job_status in jenkins_client.get_view_status(self.jenkins, self.score_view):
+			last_build_number = job_status["last_build"]
+			last_build_status = job_status["status"]
 
-	def get_bonus_per_build(self, job):
-		return len(job.get_downstream_jobs())
+			if need_to_add_job(job_status["project"]):
+				scoreJob = ScoreJob(name=job_status["project"], last_build_number=last_build_number,
+				                    last_build_status=last_build_status)
+				print
+				"Added", scoreJob.to_json()
+				scoreJob.save()
 
-
-	def clear_score(self):
-		User.objects().update(set__score=0)
+			if job_status is not None:
+				self.update_user_score(job_status)
 
 
 	def update_score_build(self, job, build):
+
+		if self.connected is False:
+			return False
+
 		for culprit in build._data["culprits"]:
 			username = culprit["fullName"]
 			user = User.objects(name=username).first()
@@ -58,7 +90,7 @@ class FunnyCats():
 				user.save()
 
 			user_score = user.score
-			total_bonus = math.ceil(self.get_bonus_per_build(job) / 2)
+			total_bonus = math.ceil(get_bonus_per_build(job) / 2)
 			if total_bonus > 5:
 				total_bonus = 5
 			points = total_bonus + 1
@@ -76,40 +108,21 @@ class FunnyCats():
 
 		return True
 
+	def connect_db(self):
+		try:
+			connect(self.db_name)
+			self.connected = True
+			return True
+		except ConnectionError:
+			print("Connection error")
+			self.connected = False
+			return False
 
-	def update_user_score(self, job_status):
-		score_job = ScoreJob.objects(name=job_status["project"]).first()
+	def disconnect_db(self):
+		if disconnect(self.db_name):
+			self.connected = False
 
-		score_last_build_number = score_job.last_build_number
-		if score_last_build_number == job_status["last_build"]:
-			return
-
-		job = self.jenkins.get_job(job_status["project"])
-		for build_number in range(score_last_build_number + 1, job_status["last_build"] + 1):
-
-			build = job.get_build(build_number)
-			if self.update_score_build(job, build):
-				score_job.update(set__last_build_number=build_number)
-
-
-	def update_view_score(self):
-		for job_status in client.get_view_status(self.jenkins, self.score_view):
-			last_build_number = job_status["last_build"]
-			last_build_status = job_status["status"]
-
-			if self.need_to_add_job(job_status["project"]):
-				scoreJob = ScoreJob(name=job_status["project"], last_build_number=last_build_number,
-				                    last_build_status=last_build_status)
-				print
-				"Addded", scoreJob.to_json()
-				scoreJob.save()
-
-			if job_status is not None:
-				self.update_user_score(job_status)
-
-	def get_user_list_score(self):
-		users_score = []
-		for user in User.objects().order_by('-score'):
-			users_score.append({"name": user.name, "score": user.score})
-		return users_score
-
+	def clear_db(self):
+		User.drop_collection()
+		ScoreJob.drop_collection()
+		Config.drop_collection()

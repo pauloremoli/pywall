@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from wall import Wall
-from service.client import get_view_status
 
 
 class JobWall(Wall):
@@ -11,14 +10,13 @@ class JobWall(Wall):
 	jobWidth = 0
 	jobHeight = 0
 
-	def __init__(self, canvas, jenkins, views):
-		Wall.__init__(self, canvas)
+	def __init__(self, canvas, jenkins_url, views):
+		Wall.__init__(self, canvas, jenkins_url)
 		self.views = views
-		self.jenkins = jenkins
 
 	def update_info(self):
 		view_index = self.itView % len(self.views)
-		self.jobs = get_view_status(self.jenkins, self.views[view_index])
+		self.jobs = self.jenkins.get_view_status(self.views[view_index])
 		self.itView = self.itView + 1
 
 	def show(self):

@@ -3,7 +3,7 @@ from Tkinter import Canvas, Frame, BOTH
 from wall.jobwall import JobWall
 from wall.scorewall import ScoreWall
 from wall.lastfailurewall import LastFailureWall
-from service import client
+from service import jenkins_client
 
 
 class PyWallFrame(Frame):
@@ -17,7 +17,7 @@ class PyWallFrame(Frame):
 		self.pack(fill=BOTH, expand=1)
 		self.canvas = Canvas(self, bg="black", borderwidth=0, highlightthickness=0)
 		self.canvas.pack(fill=BOTH, expand=1)
-		self.jenkins = client.get_jenkins(jenkins_url)
+		self.jenkins = jenkins_client.get_jenkins(jenkins_url)
 		self.create_walls(wall_views, score_view, dbname)
 		self.iterate_walls()
 
