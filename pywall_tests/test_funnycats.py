@@ -17,6 +17,13 @@ class TestFunnyCats(unittest.TestCase):
 		self.assertTrue(self.funnycats.init())
 		self.assertEquals(len(self.jenkins.get_user_list(self.jenkins)), len(User.objects()))
 
+	def test_no_connection(self):
+		self.funnycats.connect_db = mock.MagicMock()
+		self.funnycats.connect_db.return_value = False
+
+		self.assertFalse(self.funnycats.init())
+
+
 	def test_has_user_with_same_name(self):
 		user_list = []
 		for user in User.objects():
