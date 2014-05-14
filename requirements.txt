@@ -1,0 +1,2 @@
+jenkinsapi>=0.2.19
+mongoengine>=0.8.7
