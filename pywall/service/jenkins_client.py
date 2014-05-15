@@ -34,7 +34,13 @@ class JenkinsClient():
 				continue
 
 			last_build = job.get_last_build_or_none()
-			build = job.get_last_failed_build()
+			build = None
+			if job._data.has_key("lastFailedBuild"):
+				last_failure = job._data["lastFailedBuild"]
+				if last_failure.has_key("number"):
+					build_number = last_failure["number"]
+					build = job.get_build(build_number)
+
 			if (( build is not None ) and ( last_build is not None ) and (
 				last_build.get_number() == build.get_number() ) ):
 				broken_jobs.append(job.name)

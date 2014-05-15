@@ -1,4 +1,6 @@
 #!-*- coding: utf8 -*-
+import logging
+
 from pywall.service.jenkins_client import JenkinsClient
 
 
@@ -7,7 +9,12 @@ class Wall(object):
 
 	def __init__(self, canvas, jenkins_url):
 		self.canvas = canvas
-		self.jenkins = JenkinsClient(jenkins_url)
+		self.jenkins = None
+		try:
+			self.jenkins = JenkinsClient(jenkins_url)
+		except Exception, e:
+			self.error()
+			logging.error(e)
 
 	def show(self):
 		raise Exception("Unimplemented Method")
@@ -31,3 +38,13 @@ class Wall(object):
 		if (height == 1):
 			height = self.canvas.winfo_screenheight()
 		return height
+
+	def error(self):
+		self.clear('black')
+		width = self.canvasWidth()
+		height = self.canvasHeight()
+		posX = width / 2
+		posY = height / 2
+		text_font = 'Arial 30 bold'
+		message = "No connection with the server"
+		self.canvas.create_text(posX, posY, text=message, font=text_font, fill='white', justify='center')

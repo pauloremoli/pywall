@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from wall import Wall
 
 
@@ -15,9 +17,12 @@ class JobWall(Wall):
 		self.views = views
 
 	def update_info(self):
-		view_index = self.itView % len(self.views)
-		self.jobs = self.jenkins.get_view_status(self.views[view_index])
-		self.itView = self.itView + 1
+		try:
+			view_index = self.itView % len(self.views)
+			self.jobs = self.jenkins.get_view_status(self.views[view_index])
+			self.itView = self.itView + 1
+		except Exception, e:
+			logging.error(e)
 
 	def show(self):
 		self.update_info()

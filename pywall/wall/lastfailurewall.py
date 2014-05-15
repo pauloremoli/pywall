@@ -1,5 +1,6 @@
 #!-*- coding: utf8 -*-
 from datetime import datetime
+import logging
 
 import pytz
 
@@ -14,11 +15,19 @@ class LastFailureWall(Wall):
 
 
 	def update_info(self):
-		assert self.jenkins is not None
-		self.lastFailureInfo = self.jenkins.get_last_failure()
+		if self.jenkins is None:
+			self.error()
+		try:
+			self.lastFailureInfo = self.jenkins.get_last_failure()
+			return True
+		except Exception, e:
+			logging.error(e)
+			self.error()
+			return False
 
 	def show(self):
-		self.update_info()
+		if not self.update_info():
+			return
 		self.clear('#252525')
 		broken_jobs = self.lastFailureInfo['broken_jobs']
 		culprits = self.lastFailureInfo['culprits']

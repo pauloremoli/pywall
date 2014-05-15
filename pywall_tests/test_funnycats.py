@@ -3,6 +3,7 @@ import unittest
 import mock
 
 from pywall.funnycats.funnycats import *
+from pywall.service.jenkins_client import JenkinsClient
 
 
 class TestFunnyCats(unittest.TestCase):
@@ -22,7 +23,12 @@ class TestFunnyCats(unittest.TestCase):
 		self.funnycats.connect_db.return_value = False
 
 		self.assertFalse(self.funnycats.init())
+		self.assertFalse(self.funnycats.is_connected())
 
+		self.assertFalse(self.funnycats.is_connected())
+
+	def test_no_server(self):
+		self.assertRaises(Exception, JenkinsClient("http://localhost:8080/jenkins"))
 
 	def test_has_user_with_same_name(self):
 		user_list = []

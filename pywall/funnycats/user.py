@@ -12,7 +12,7 @@ def clear_score():
 	User.objects().update(set__score=0)
 
 
-def get_user_list_score(self):
+def get_user_list_score():
 	users_score = []
 	for user in User.objects().order_by('-score'):
 		users_score.append({"name": user.name, "score": user.score})

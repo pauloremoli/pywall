@@ -6,7 +6,6 @@ from mongoengine.connection import disconnect
 from pywall.funnycats.config import Config
 from pywall.funnycats.score_job import ScoreJob, need_to_add_job, get_bonus_per_build
 from pywall.funnycats.user import User
-from pywall.service import jenkins_client
 
 
 class FunnyCats():
@@ -25,7 +24,7 @@ class FunnyCats():
 			self.connected = False
 			return False
 
-		for user in self.jenkins.get_user_list(self.jenkins):
+		for user in self.jenkins.get_user_list():
 			users = User.objects(name=user["name"])
 			if users.count() == 0:
 				new_user = User(name=user["name"])
@@ -62,7 +61,7 @@ class FunnyCats():
 		if self.connected is False:
 			return False
 
-		for job_status in jenkins_client.get_view_status(self.jenkins, self.score_view):
+		for job_status in self.jenkins.get_view_status(self.score_view):
 			last_build_number = job_status["last_build"]
 			last_build_status = job_status["status"]
 
@@ -123,6 +122,7 @@ class FunnyCats():
 			self.connected = False
 
 	def clear_db(self):
-		User.drop_collection()
-		ScoreJob.drop_collection()
-		Config.drop_collection()
+		if self.is_connected():
+			User.drop_collection()
+			ScoreJob.drop_collection()
+			Config.drop_collection()
