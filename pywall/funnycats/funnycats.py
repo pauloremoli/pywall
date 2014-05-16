@@ -45,14 +45,16 @@ class FunnyCats():
 
 		score_last_build_number = score_job.last_build_number
 		if score_last_build_number == job_status["last_build"]:
-			return
+			return True
 
 		job = self.jenkins.get_job(job_status["project"])
 		for build_number in range(score_last_build_number + 1, job_status["last_build"] + 1):
 
-			build = job.get_build(build_number)
+			build = job.get_build(job, build_number)
 			if self.update_score_build(job, build):
 				score_job.update(set__last_build_number=build_number)
+
+		return True
 
 
 	def update_view_score(self):

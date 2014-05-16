@@ -124,3 +124,4 @@ class JenkinsClient():
 
 	def get_bonus_per_build(job):
 		return len(job.get_downstream_jobs())
+
