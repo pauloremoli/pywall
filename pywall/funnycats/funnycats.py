@@ -1,10 +1,10 @@
-import math
-
 from mongoengine import connect, ConnectionError
+
 from mongoengine.connection import disconnect
 
 from pywall.funnycats.config import Config
-from pywall.funnycats.score_job import ScoreJob, need_to_add_job, get_bonus_per_build
+
+from pywall.funnycats.score_job import ScoreJob, need_to_add_job
 from pywall.funnycats.user import User
 
 
@@ -78,10 +78,10 @@ class FunnyCats():
 
 	def update_score_build(self, job, build):
 
-		if self.connected is False:
+		if self.is_connected() is False:
 			return False
 
-		for culprit in build._data["culprits"]:
+		for culprit in self.jenkins.get_culprits(build):
 			username = culprit["fullName"]
 			user = User.objects(name=username).first()
 			if user is None:
@@ -89,7 +89,7 @@ class FunnyCats():
 				user.save()
 
 			user_score = user.score
-			total_bonus = math.ceil(get_bonus_per_build(job) / 2)
+			total_bonus = self.jenkins.get_bonus_per_build(job)
 			if total_bonus > 5:
 				total_bonus = 5
 			points = total_bonus + 1
@@ -106,6 +106,7 @@ class FunnyCats():
 				user.reload()
 
 		return True
+
 
 	def connect_db(self):
 		try:

@@ -18,6 +18,3 @@ def need_to_add_job(job_name):
 	else:
 		return False
 
-
-def get_bonus_per_build(job):
-	return len(job.get_downstream_jobs())
