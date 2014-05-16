@@ -50,7 +50,10 @@ class FunnyCats():
 		job = self.jenkins.get_job(job_status["project"])
 		for build_number in range(score_last_build_number + 1, job_status["last_build"] + 1):
 
-			build = job.get_build(build_number)
+			try:
+				build = job.get_build(build_number)
+			except Exception:
+				continue
 			if self.update_score_build(job, build):
 				score_job.update(set__last_build_number=build_number)
 
@@ -89,7 +92,7 @@ class FunnyCats():
 				user.save()
 
 			user_score = user.score
-			total_bonus = math.ceil(get_bonus_per_build(job) / 2)
+			total_bonus = get_bonus_per_build(job)
 			if total_bonus > 5:
 				total_bonus = 5
 			points = total_bonus + 1

@@ -20,7 +20,8 @@ class JobWall(Wall):
 		try:
 			view_index = self.itView % len(self.views)
 			self.jobs = self.jenkins.get_view_status(self.views[view_index])
-			self.itView = self.itView + 1
+			if len(self.views) != 1:
+				self.itView = self.itView + 1
 		except Exception, e:
 			logging.error(e)
 
