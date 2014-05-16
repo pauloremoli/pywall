@@ -40,7 +40,7 @@ class ScoreWall(Wall):
 			return
 
 		index = 1
-		textFont = 'Arial 60 bold'
+		textFont = 'Arial 30 bold'
 		textHeight = 90
 		width = self.canvasWidth()
 		height = self.canvasHeight()

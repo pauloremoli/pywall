@@ -114,3 +114,14 @@ class JenkinsClient():
 			jobs.append(project)
 
 		return jobs
+
+
+	def get_job(self, job_name):
+		return self.jenkins.get_job(job_name)
+
+	def get_culprits(self, build):
+		return build._data["culprits"]
+
+	def get_bonus_per_build(job):
+		return len(job.get_downstream_jobs())
+
