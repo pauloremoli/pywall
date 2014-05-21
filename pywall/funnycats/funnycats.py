@@ -50,9 +50,11 @@ class FunnyCats():
 
 		job = self.jenkins.get_job(job_status["project"])
 		for build_number in range(score_last_build_number + 1, job_status["last_build"] + 1):
-			logging.log(logging.DEBUG,
-			            "Updating user score for job: " + job_status["project"] + " Build: " + str(build_number))
-			build = job.get_build(build_number)
+
+			try:
+				build = job.get_build(build_number)
+			except Exception:
+				continue
 			if self.update_score_build(job, build):
 				score_job.update(set__last_build_number=build_number)
 

@@ -43,12 +43,13 @@ class LastFailureWall(Wall):
 		for job in broken_jobs:
 			message += '\n' + job
 
-		message += '\n'
-		message += '\nPOSSÍVEIS CULPADOS:'
-
-		for culprit in culprits:
+		if(len(culprits) != 0):
 			message += '\n'
-			message += culprit
+			message += '\nPOSSÍVEIS CULPADOS:'
+
+			for culprit in culprits:
+				message += '\n'
+				message += culprit
 
 		width = self.canvasWidth()
 		height = self.canvasHeight()

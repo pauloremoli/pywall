@@ -25,7 +25,7 @@ class JenkinsClient():
 
 	def get_last_failure(self):
 		last_failed_build_date = None
-		culprits = []
+		culprits = set()
 		broken_jobs = []
 		for item in self.jenkins.get_jobs():
 			job = self.jenkins.get_job(item[0])
@@ -37,7 +37,7 @@ class JenkinsClient():
 			build = None
 			if job._data.has_key("lastFailedBuild"):
 				last_failure = job._data["lastFailedBuild"]
-				if last_failure.has_key("number"):
+				if last_failure is not None and last_failure.has_key("number"):
 					build_number = last_failure["number"]
 					build = job.get_build(build_number)
 
