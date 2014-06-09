@@ -5,7 +5,7 @@ import mock
 from pywall.funnycats.funnycats import *
 
 
-class TestFunnyCats(unittest.TestCase):
+class TestsFunnyCats(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		cls.jenkins = mock.Mock()

@@ -6,7 +6,7 @@ from pywall.funnycats.funnycats import FunnyCats
 from pywall.funnycats.score_job import ScoreJob, need_to_add_job
 
 
-class TestScoreJob(unittest.TestCase):
+class TestsScoreJob(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		cls.jenkins = mock.Mock()
