@@ -10,33 +10,34 @@ from wall import Wall
 class LastFailureWall(Wall):
 	lastFailureInfo = []
 
-	def __init__(self, canvas, jenkins_url):
-		Wall.__init__(self, canvas, jenkins_url)
+	def __init__(self, canvas, jenkins):
+		Wall.__init__(self, canvas, jenkins)
 
 
 	def update_info(self):
 		if self.jenkins is None:
-			self.error()
+			return False
 		try:
 			self.lastFailureInfo = self.jenkins.get_last_failure()
-			return True
 		except Exception, e:
 			logging.error(e)
-			self.error()
 			return False
 
-	def show(self):
-		if not self.update_info():
-			return
-		self.clear('#252525')
-		broken_jobs = self.lastFailureInfo['broken_jobs']
-		culprits = self.lastFailureInfo['culprits']
+		return True
 
-		if (broken_jobs):
-			self.paint_broken_jobs(broken_jobs, culprits)
+	def show(self):
+		if self.update_info():
+			self.clear('#252525')
+			broken_jobs = self.lastFailureInfo['broken_jobs']
+			culprits = self.lastFailureInfo['culprits']
+
+			if (broken_jobs):
+				self.paint_broken_jobs(broken_jobs, culprits)
+			else:
+				last_failed = self.lastFailureInfo['last_failed']
+				self.paint_last_failure(last_failed, culprits)
 		else:
-			last_failed = self.lastFailureInfo['last_failed']
-			self.paint_last_failure(last_failed, culprits)
+			self.error()
 
 	def paint_broken_jobs(self, broken_jobs, culprits):
 		message = 'PROJETO(S) COM ERRO:'

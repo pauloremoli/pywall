@@ -65,6 +65,9 @@ class FunnyCats():
 		if self.connected is False:
 			return False
 
+		if self.jenkins is None:
+			return False
+
 		for job_status in self.jenkins.get_view_status(self.score_view):
 
 

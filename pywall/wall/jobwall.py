@@ -18,8 +18,7 @@ class JobWall(Wall):
 
 	def update_info(self):
 		if (self.jenkins is None):
-			self.error()
-			return
+			return False
 		try:
 			view_index = self.itView % len(self.views)
 			self.jobs = self.jenkins.get_view_status(self.views[view_index])
@@ -28,11 +27,16 @@ class JobWall(Wall):
 			
 		except Exception, e:
 			logging.error(e)
+			return False
+
+		return True
 
 	def show(self):
-		self.update_info()
-		self.clear('black')
-		self.draw_jobs(self.jobs)
+		if self.update_info():
+			self.clear('black')
+			self.draw_jobs(self.jobs)
+		else:
+			self.error()
 
 	def paintJob(self, job, rect):
 		name = job['project']

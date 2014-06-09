@@ -5,11 +5,11 @@ from pywall.funnycats.user import get_user_list_score
 from wall import Wall
 
 
-class ScoreWall(Wall):
+class FunnyCatsWall(Wall):
 	userListScore = []
 
-	def __init__(self, canvas, jenkins_url, score_view, dbname):
-		Wall.__init__(self, canvas, jenkins_url)
+	def __init__(self, canvas, jenkins, score_view, dbname):
+		Wall.__init__(self, canvas, jenkins)
 
 		self.funnycats = FunnyCats(self.jenkins, score_view, dbname)
 		self.funnycats.init()
@@ -23,33 +23,26 @@ class ScoreWall(Wall):
 			self.users_score = get_user_list_score()
 		except Exception, e:
 			logging.error(e)
-			self.error()
 
-	def show(self):
-		self.update_info()
-		self.clear('#252525')
 
-		if self.users_score is None:
-			width = self.canvasWidth()
-			height = self.canvasHeight()
-			posX = width / 2
-			posY = height / 2
-			text_font = 'Arial 30 bold'
-			message = "No user"
-			self.canvas.create_text(posX, posY, text=message, font=text_font, fill='white', justify='center')
-			return
+	def draw_no_user(self):
+		width = self.canvasWidth()
+		height = self.canvasHeight()
+		posX = width / 2
+		posY = height / 2
+		text_font = 'Arial 30 bold'
+		message = "No user"
+		self.canvas.create_text(posX, posY, text=message, font=text_font, fill='white', justify='center')
 
+	def draw(self):
 		index = 1
 		textFont = 'Arial 30 bold'
 		textHeight = 90
 		width = self.canvasWidth()
 		height = self.canvasHeight()
 		posX = width / 2
-
 		textTotalHeight = textHeight * len(self.users_score)
-
 		yInit = ((height - textTotalHeight) / 2) - (textHeight / 2)
-
 		for user in self.users_score:
 			nameStr = str(index) + '.    ' + user["name"]
 
@@ -65,6 +58,18 @@ class ScoreWall(Wall):
 			                        anchor='w')
 
 			index += 1
+
+	def show(self):
+		if self.update_info():
+			self.clear('#252525')
+
+			if self.users_score is None:
+				self.draw_no_user()
+				return
+
+			self.draw()
+		else:
+			self.error()
 
 	def getColor(self, score, index, size):
 		if (score < 0 or (size - index) < 3):

@@ -31,6 +31,9 @@ class FunnyCats():
 			self.connected = False
 			return False
 
+		if self.jenkins is None:
+			return False
+
 		return True
 
 	def is_connected(self):

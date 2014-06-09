@@ -1,20 +1,12 @@
 #!-*- coding: utf8 -*-
-import logging
-
-from pywall.service.jenkins_client import JenkinsClient
-
 
 class Wall(object):
 	canvas = 0
 
-	def __init__(self, canvas, jenkins_url):
+	def __init__(self, canvas, jenkins):
 		self.canvas = canvas
 		self.jenkins = None
-		try:
-			self.jenkins = JenkinsClient(jenkins_url)
-		except Exception, e:
-			self.error()
-			logging.error(e)
+
 
 	def show(self):
 		raise Exception("Unimplemented Method")
