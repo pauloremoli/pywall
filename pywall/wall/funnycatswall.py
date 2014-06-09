@@ -18,11 +18,13 @@ class FunnyCatsWall(Wall):
 	def update_info(self):
 		try:
 			if self.funnycats.is_connected() is False:
-				raise Exception
+				return False
 			self.funnycats.update_view_score()
 			self.users_score = get_user_list_score()
+			return True
 		except Exception, e:
 			logging.error(e)
+			return False
 
 
 	def draw_no_user(self):
@@ -37,7 +39,7 @@ class FunnyCatsWall(Wall):
 	def draw(self):
 		index = 1
 		textFont = 'Arial 30 bold'
-		textHeight = 90
+		textHeight = 40
 		width = self.canvasWidth()
 		height = self.canvasHeight()
 		posX = width / 2

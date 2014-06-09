@@ -5,7 +5,7 @@ class Wall(object):
 
 	def __init__(self, canvas, jenkins):
 		self.canvas = canvas
-		self.jenkins = None
+		self.jenkins = jenkins
 
 
 	def show(self):

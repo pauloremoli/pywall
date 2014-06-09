@@ -12,8 +12,8 @@ class JobWall(Wall):
 	jobWidth = 0
 	jobHeight = 0
 
-	def __init__(self, canvas, jenkins_url, views):
-		Wall.__init__(self, canvas, jenkins_url)
+	def __init__(self, canvas, jenkins, views):
+		Wall.__init__(self, canvas, jenkins)
 		self.views = views
 
 	def update_info(self):

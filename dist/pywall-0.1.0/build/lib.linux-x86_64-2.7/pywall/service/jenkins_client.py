@@ -125,3 +125,5 @@ class JenkinsClient():
 	def get_bonus_per_build(self, job):
 		return len(job.get_downstream_jobs())
 
+	def get_jenkins(self):
+		return self.jenkins
