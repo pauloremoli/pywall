@@ -36,8 +36,7 @@ class FunnyCats():
 	def is_connected(self):
 		return self.connected
 
-
-	def update_user_score(self, job_status):
+	def update_score_job(self, job_status):
 
 		if self.connected is False:
 			return False
@@ -50,18 +49,17 @@ class FunnyCats():
 
 		job = self.jenkins.get_job(job_status["project"])
 		for build_number in range(score_last_build_number + 1, job_status["last_build"] + 1):
-
-			try:
-				build = job.get_build(build_number)
-			except Exception:
+			build = self.jenkins.get_build(build_number, job)
+			if build is None:
 				continue
+
 			if self.update_score_build(job, build):
 				score_job.update(set__last_build_number=build_number)
 
 		return True
 
 
-	def update_view_score(self):
+	def update_score_view(self):
 		if self.connected is False:
 			return False
 
@@ -83,7 +81,7 @@ class FunnyCats():
 				logging.log(logging.DEBUG, "Inserted job: " + job_name)
 
 			if job_status is not None:
-				self.update_user_score(job_status)
+				self.update_score_job(job_status)
 
 		return True
 

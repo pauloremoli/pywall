@@ -40,12 +40,32 @@ class TestsFunnyCats(unittest.TestCase):
 		self.jenkins.get_user_list.return_value = [{"name": "User1"}, {"name": "User2"}, {"name": "User3"}]
 		self.jenkins.get_culprits.return_value = [{"fullName": "User1"}, {"fullName": "User2"}]
 		self.jenkins.get_view_status.return_value = self.view_status
+		self.jenkins.get_bonus_per_build.return_value = 0
+
 		self.build.get_number_return_value = 1
 		self.build.is_running.return_value = False
 		self.build.get_status.return_value = 'SUCCESS'
-		self.jenkins.get_bonus_per_build.return_value = 0
 
-		self.job.get_build.return_value = self.build
+		build2 = mock.Mock()
+		build2.get_number_return_value = 2
+		build2.is_running.return_value = False
+		build2.get_status.return_value = 'SUCCESS'
+
+		build3 = mock.Mock()
+		build3.get_number_return_value = 3
+		build3.is_running.return_value = False
+		build3.get_status.return_value = 'SUCCESS'
+
+		build4 = None
+
+		build5 = mock.Mock()
+		build5.get_number_return_value = 5
+		build5.is_running.return_value = False
+		build5.get_status.return_value = 'FAILURE'
+
+		self.builds = {1: self.build, 2: build2, 3: build3, 4: build4, 5: build5}
+
+		self.jenkins.get_build = mock.MagicMock(side_effect=self.get_mock_build)
 		self.jenkins.get_job.return_value = self.job
 
 		self.funnycats = FunnyCats(self.jenkins, "Score", "funnycats_tests")
@@ -63,6 +83,8 @@ class TestsFunnyCats(unittest.TestCase):
 		score_job.last_build_status = 'SUCCESS'
 		score_job.save()
 
+	def get_mock_build(self, build_number, job):
+		return self.builds[build_number]
 
 	def tearDown(self):
 		self.funnycats.clear_db()
@@ -73,14 +95,12 @@ class TestsFunnyCats(unittest.TestCase):
 		for user in self.jenkins.get_user_list(self.jenkins):
 			assert User.objects(name=user["name"]).first is not None
 
-
 	def test_no_connection(self):
 		self.funnycats.connect_db = mock.MagicMock()
 		self.funnycats.connect_db.return_value = False
 
 		self.assertFalse(self.funnycats.init())
 		self.assertFalse(self.funnycats.is_connected())
-
 
 	def test_update_score_build_success(self):
 		self.assertTrue(self.funnycats.update_score_build(self.job, self.build))
@@ -89,16 +109,6 @@ class TestsFunnyCats(unittest.TestCase):
 
 		self.assertEquals(11, user1.score)
 		self.assertEquals(1, user2.score)
-
-
-	def test_consecutive_builds(self):
-		self.assertTrue(self.funnycats.update_score_build(self.job, self.build))
-		self.assertTrue(self.funnycats.update_score_build(self.job, self.build))
-		user1 = User.objects(name="User1").first()
-		user2 = User.objects(name="User2").first()
-		self.assertEquals(12, user1.score)
-		self.assertEquals(2, user2.score)
-
 
 	def test_update_score_build_failure(self):
 		self.build.get_status.return_value = 'FAILURE'
@@ -109,6 +119,13 @@ class TestsFunnyCats(unittest.TestCase):
 		self.assertEquals(5, user1.score)
 		self.assertEquals(-5, user2.score)
 
+	def test_consecutive_builds(self):
+		self.assertTrue(self.funnycats.update_score_build(self.job, self.build))
+		self.assertTrue(self.funnycats.update_score_build(self.job, self.build))
+		user1 = User.objects(name="User1").first()
+		user2 = User.objects(name="User2").first()
+		self.assertEquals(12, user1.score)
+		self.assertEquals(2, user2.score)
 
 	def test_max_bonus_per_downstream_project(self):
 		self.jenkins.get_bonus_per_build.return_value = 10
@@ -118,7 +135,6 @@ class TestsFunnyCats(unittest.TestCase):
 		user2 = User.objects(name="User2").first()
 		self.assertEquals(16, user1.score)
 		self.assertEquals(6, user2.score)
-
 
 	def test_update_score_build_running(self):
 		self.build.is_running.return_value = True
@@ -134,9 +150,8 @@ class TestsFunnyCats(unittest.TestCase):
 		user1.reload()
 		self.assertEquals(5, user1.score)
 
-
-	def test_update_user_score(self):
-		self.assertTrue(self.funnycats.update_user_score(self.job_status))
+	def test_update_score_job(self):
+		self.assertTrue(self.funnycats.update_score_job(self.job_status))
 
 		user1 = User.objects(name="User1").first()
 		self.assertEquals(11, user1.score)
@@ -147,10 +162,9 @@ class TestsFunnyCats(unittest.TestCase):
 		score_job = ScoreJob.objects(name="Job1").first()
 		self.assertEquals(2, score_job.last_build_number)
 
-
-	def test_update_user_score_with_two_builds_behind(self):
+	def test_update_score_job_with_two_builds_behind(self):
 		self.job_status["last_build"] = 3
-		self.assertTrue(self.funnycats.update_user_score(self.job_status))
+		self.assertTrue(self.funnycats.update_score_job(self.job_status))
 
 		user1 = User.objects(name="User1").first()
 		self.assertEquals(12, user1.score)
@@ -161,8 +175,21 @@ class TestsFunnyCats(unittest.TestCase):
 		score_job = ScoreJob.objects(name="Job1").first()
 		self.assertEquals(3, score_job.last_build_number)
 
-	def test_update_view_score(self):
-		self.funnycats.update_view_score()
+	def test_update_score_job_with_build_missing(self):
+		self.job_status["last_build"] = 5
+		self.assertTrue(self.funnycats.update_score_job(self.job_status))
+
+		user1 = User.objects(name="User1").first()
+		self.assertEquals(7, user1.score)
+
+		user2 = User.objects(name="User2").first()
+		self.assertEquals(-3, user2.score)
+
+		score_job = ScoreJob.objects(name="Job1").first()
+		self.assertEquals(5, score_job.last_build_number)
+
+	def test_update_score_view(self):
+		self.funnycats.update_score_view()
 
 		job1 = ScoreJob.objects(name='Job1').first()
 		self.assertEquals(2, job1.last_build_number)

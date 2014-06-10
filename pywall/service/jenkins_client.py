@@ -44,8 +44,8 @@ class JenkinsClient():
 			if (( build is not None ) and ( last_build is not None ) and (
 				last_build.get_number() == build.get_number() ) ):
 				broken_jobs.append(job.name)
-				for culprit in build.get_culprits():
-					culprits.append(culprit['fullName'])
+				for culprit in self.get_culprits(build):
+					culprits.add(culprit['fullName'])
 				continue
 			if ( build is not None ):
 				if ( last_failed_build_date is None ):
@@ -93,8 +93,9 @@ class JenkinsClient():
 				project.update({'last_build': build.get_number()})
 				project.update({'status': build.get_status()})
 
-				previousBuild = job.get_build(build.get_number() - 1)
-				project.update({'previousBuildStatus': previousBuild.get_status()})
+				previousBuild = self.get_build(build.get_number() - 1, job)
+				if previousBuild is not None:
+					project.update({'previousBuildStatus': previousBuild.get_status()})
 
 				if ( build.is_running() ):
 					project.update({'status': 'BUILDING'})
@@ -125,3 +126,8 @@ class JenkinsClient():
 	def get_bonus_per_build(self, job):
 		return len(job.get_downstream_jobs())
 
+	def get_build(self, build_number, job):
+		try:
+			return job.get_build(build_number)
+		except Exception:
+			return None

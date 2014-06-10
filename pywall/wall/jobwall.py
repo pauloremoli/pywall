@@ -21,10 +21,11 @@ class JobWall(Wall):
 			return False
 		try:
 			view_index = self.itView % len(self.views)
-			self.jobs = self.jenkins.get_view_status(self.views[view_index])
+			view_name = self.views[view_index]
+			self.jobs = self.jenkins.get_view_status(view_name)
 			if len(self.views) != 1:
 				self.itView += 1
-			
+
 		except Exception, e:
 			logging.error(e)
 			return False
@@ -40,15 +41,20 @@ class JobWall(Wall):
 
 	def paintJob(self, job, rect):
 		name = job['project']
-		buildNumber = job['last_build']
-		status = job['status']
-		previousBuildStatus = job['previousBuildStatus']
+		buildNumber = None
+		status = None
+		previousBuildStatus = None
+		if 'last_build' in job:
+			buildNumber = job['last_build']
+			status = job['status']
+		if 'previousBuildStatus' in job:
+			previousBuildStatus = job['previousBuildStatus']
 
 		#Choose color for each build status
 		color = '#3c3c3c'
 		buildNumberColor = '#559758'
 
-		if (job['last_build'] is None or job['status'] == 'ABORTED'):
+		if ('last_build' not in job or job['last_build'] is None or job['status'] == 'ABORTED'):
 			color = '#3c3c3c'
 			buildNumberColor = '#979797'
 		elif (job['status'] == 'SUCCESS'):
